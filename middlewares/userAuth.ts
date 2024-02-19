@@ -1,13 +1,21 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
+import { CustomSession } from '../app'
 
 // Handle user authentication
 const userAuth = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-  try{
-    let token: any = req.headers['x-auth-token'];
+  if(!req.session){
+    return res.status(404).json({
+      msg: "Unauthorized request. Access denied..."
+    })
+  }
 
-    if(!token){
+  try{
+
+    const user = (req.session as CustomSession).userId
+
+    if(!user){
       return res.status(401).json({
         error: {
           msg: "Unauthorized request. Access denied..."
@@ -15,12 +23,7 @@ const userAuth = async (req: express.Request, res: express.Response, next: expre
       })
     }
 
-    if(typeof token === "string"){
-      let decrypt: any = await jwt.verify(token, process.env.JWT_SECRET_KEY)
-      req.headers['user'] = decrypt.user
-
-      next()
-    }
+    next()
 
   }catch(err){
     res.status(500).json({

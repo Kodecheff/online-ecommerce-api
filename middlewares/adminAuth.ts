@@ -1,13 +1,22 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
+import { CustomSession } from '../app'
 
 
 // Handle admin authentication
 const adminAuth = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  try{
-    let token: any = req.headers['x-admin-token']
 
-    if(!token){
+  if(!req.session){
+    return res.status(404).json({
+      msg: "Unauthorized request. Access denied..."
+    })
+  }
+
+  try{
+
+    const admin = (req.session as CustomSession).adminId
+
+    if(!admin){
       return res.status(401).json({
         error: {
           msg: "Unauthorized request. Access denied..."
@@ -15,12 +24,7 @@ const adminAuth = async (req: express.Request, res: express.Response, next: expr
       })
     }
 
-    if(typeof token === "string"){
-      let decodeToken: any = await jwt.verify(token, process.env.ADMIN_TOKEN_SECRET)
-      req.headers['admin'] = decodeToken.admin
-
-      next()
-    }
+    next()
   }catch(err){
     res.status(500).json({
       error: {

@@ -5,7 +5,8 @@ import dotEnv from 'dotenv';
 import mongoose from "mongoose";
 import fileupload from 'express-fileupload'
 import upload from "./middlewares/uploadProduct";
-import bodyParser from "body-parser";
+import session, { Session } from 'express-session';
+import MongoStore from "connect-mongo";
 
 import productRoutes from "./routes/products/index";
 import userRoutes from "./routes/user/index";
@@ -23,8 +24,8 @@ app.use(cors())
 dotEnv.config({path: './.env'})
 
 
-const hostname: string | undefined = process.env.HOST_NAME
-const port: string | undefined = process.env.PORT;
+const hostname = process.env.HOST_NAME as string
+const port = process.env.PORT as any
 
 
 // configure middleware
@@ -37,8 +38,27 @@ app.use(upload.fields([{name: 'coverImage', maxCount: 1}, {name: 'otherImages', 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Sessioning
+export interface CustomSession extends Session {
+  adminId: string
+  userId: string;
+  cartId: string
+}
+
+app.use(session({
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_DB_LOCAL_URL as string,
+    autoRemove: 'native',
+    ttl: 12 * 60 * 60
+  }),
+  secret: 'some-secret-key',
+  cookie: {maxAge: 30000},
+  saveUninitialized: false,
+  resave: false,
+}))
+
 // connect to mongodb
-let mongo_url: string | undefined = process.env.MONGO_DB_LOCAL_URL
+let mongo_url: string = process.env.MONGO_DB_LOCAL_URL
 
 if(mongo_url)
   mongoose.connect(mongo_url).then((res) => {
@@ -61,7 +81,7 @@ app.get("/", (req: express.Request, res: express.Response) => {
 });
 
 if(hostname && port){
-  app.listen(Number(port), hostname, () => {
+  app.listen(port, hostname, () => {
     console.log(`Now running server on http://${hostname}:${port}`);
   });
 }
