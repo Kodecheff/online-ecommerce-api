@@ -280,13 +280,13 @@ router.get(
   @method: GET
   @access: PRIVATE
 */
-router.post("/logout", userAuth, async (req, res, next) => {
+router.post("/me/logout", userAuth, async (req, res, next) => {
   try {
     req.session.destroy((err) => {
       if (err) {
         console.log("Error logging user out: ", err);
       } else {
-        console.log("User logged out successfully");
+        console.log("User session destroyed");
       }
     });
   } catch (err) {
@@ -294,7 +294,9 @@ router.post("/logout", userAuth, async (req, res, next) => {
     return next(new Error("Error logging out"));
   }
 
-  res.status(200).send();
+  res.status(200).json({
+    msg: "User logged out successfully"
+  });
 });
 
 /*
@@ -309,7 +311,7 @@ router.post("/admin/logout", adminAuth, async (req, res, next) => {
       if (err) {
         console.log("Error logging admin out: ", err);
       } else {
-        console.log("Admin logged out successfully");
+        console.log("Admin session destroyed");
       }
     });
   } catch (err) {
@@ -317,7 +319,9 @@ router.post("/admin/logout", adminAuth, async (req, res, next) => {
     return next(new Error("Error logging out"));
   }
 
-  res.status(200).send();
+  res.status(200).json({
+    msg: "Admin logged out successfully"
+  });
 });
 
 

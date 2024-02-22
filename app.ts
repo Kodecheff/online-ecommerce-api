@@ -52,7 +52,7 @@ app.use(session({
     ttl: 12 * 60 * 60
   }),
   secret: 'some-secret-key',
-  cookie: {maxAge: 30000},
+  cookie: {maxAge: 12 * 60 * 60 * 1000},
   saveUninitialized: false,
   resave: false,
 }))

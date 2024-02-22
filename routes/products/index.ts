@@ -144,30 +144,76 @@ router.post(
         return res.status(400).json({ msg: "Product not found." });
       }
 
-      let cart: ICart | null = new Cart({
-        productId,
+      const totalItems = []
+
+      let item = {
+        productId: product._id,
+        name: product.name,
+        price: product.price,
         quantity: purchaseQuantity,
-        price: parseInt(product.price) * purchaseQuantity,
-        userId: (req.session as CustomSession).userId
-      })
+        type: product.type
+      }
 
-      await cart.save().then((cart) => {
-        (req.session as CustomSession).cartId = cart._id
+      totalItems.push(item)
 
+      function calcTotalPrice(items){
+        let totalPrice = 0;
 
-        req.session.save(err => {
-          if(err){
-            console.log("Error saving session: ", err)
-          }else{
-            console.log("Session saved successfully: ", req.session)
-          }
+        for(const item of items){
+          totalPrice += (parseInt(item.price) * parseInt(item.quantity))
+        }
+
+        return totalPrice
+      }
+
+      let cart: ICart | null = await Cart.findOne({userId: (req.session as CustomSession).userId})
+
+      // If no existing cart for that user, create a new cart
+      if(!cart){
+
+        let cart: ICart | null = new Cart({
+          productId,
+          quantity: purchaseQuantity,
+          price: parseInt(product.price) * purchaseQuantity,
+          userId: (req.session as CustomSession).userId,
+          items: totalItems,
+          totalPrice: calcTotalPrice(totalItems)
         })
 
-        res.status(200).json({
-          msg: "Cart updated successfuly",
+        await cart.save().then((cart) => {  
+  
+          req.session.save(err => {
+            if(err){
+              console.log("Error saving session: ", err)
+            }else{
+              console.log("Session saved successfully: ", req.session)
+            }
+          })
+        })
+
+        return res.status(200).json({
+          msg: "Cart updated successfully",
           cart
         });
-      })
+
+      }
+      else{
+
+        // If there is an existing cart
+        cart.items.push(item)
+
+        cart.totalPrice = calcTotalPrice(cart.items)
+
+        cart.save().then((updatedCart) => {
+
+          res.status(200).json({
+            msg: "Cart updated successfully",
+            updatedCart
+          });
+        }).catch(err => {
+          console.log("Error updating cart: ", err)
+        })
+      }
 
     }catch(err){
       console.log(err)

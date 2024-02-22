@@ -3,19 +3,15 @@ import mongoose, {Model} from 'mongoose';
 const { Schema } = mongoose
 
 const cartSchema = new Schema({
-  productId: {
-    type: String,
-    required:  true
-  },
   userId: {
     type: String,
     required: true
   },
-  quantity: {
-    type: String,
+  items: {
+    type: Array,
     required: true
   },
-  price: {
+  totalPrice: {
     type: Number,
     required: true
   }
