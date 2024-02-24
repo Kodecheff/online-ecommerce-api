@@ -166,7 +166,7 @@ router.post(
         return totalPrice
       }
 
-      let cart: ICart | null = await Cart.findOne({userId: (req.session as CustomSession).userId})
+      let cart: ICart | null = await Cart.findOne({userId: (req.session as CustomSession).userId}) //Find cart with the user ID
 
       // If no existing cart for that user, create a new cart
       if(!cart){
@@ -199,7 +199,7 @@ router.post(
       }
       else{
 
-        // If there is an existing cart
+        // If there is an existing cart, push new item
         cart.items.push(item)
 
         cart.totalPrice = calcTotalPrice(cart.items)

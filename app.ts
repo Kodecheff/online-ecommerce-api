@@ -12,6 +12,7 @@ import productRoutes from "./routes/products/index";
 import userRoutes from "./routes/user/index";
 import loginRoutes from "./routes/login/index";
 import signupRoutes from "./routes/signup/index";
+import transactionRoutes from "./routes/transaction/index";
 
 import appLogger from "./middlewares/logger";
 
@@ -73,6 +74,7 @@ app.use("/product", productRoutes);
 app.use("/user", userRoutes);
 app.use("/login", loginRoutes);
 app.use("/signup", signupRoutes);
+app.use("/transaction", transactionRoutes)
 
 app.use('/uploads', express.static('uploads'))
 

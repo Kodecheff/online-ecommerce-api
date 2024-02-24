@@ -14,8 +14,16 @@ const cartSchema = new Schema({
   totalPrice: {
     type: Number,
     required: true
-  }
+  },
+  // expireAt: {
+  //   type: Date,
+  //   default: Date.now,
+  //   index: { expires: '5s' } 
+  // }
 }, {timestamps: true})
+
+// cartSchema.index({createdAt: 1}, {expireAfterSeconds: 60}) // Clear document after 10 seconds
+
 
 const Cart = mongoose.model('cart', cartSchema)
 
